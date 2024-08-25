@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons';
+import bgImage from '../assets/bg.svg';
 import {
   Box,
   Button,
@@ -11,8 +13,10 @@ import {
   Text,
   Flex,
   useToast,
+  IconButton,
+  InputGroup,
+  InputRightElement
 } from '@chakra-ui/react';
-import bgImage from '../assets/bg.svg'; 
 
 const SignupLogin = () => {
   const [name, setName] = useState('');
@@ -23,6 +27,7 @@ const SignupLogin = () => {
   const [storedPassword, setStoredPassword] = useState('');
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const toast = useToast();
 
   const handleSignUp = (e) => {
@@ -125,14 +130,24 @@ const SignupLogin = () => {
               </FormControl>
               <FormControl id="password" isRequired mb={4}>
                 <FormLabel>Password:</FormLabel>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  variant="outline"
-                  focusBorderColor="blue.500"
-                />
+                <InputGroup>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    variant="outline"
+                    focusBorderColor="blue.500"
+                  />
+                  <InputRightElement>
+                    <IconButton
+                      variant="link"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                      onClick={() => setShowPassword(!showPassword)}
+                    />
+                  </InputRightElement>
+                </InputGroup>
               </FormControl>
               {error && (
                 <Box

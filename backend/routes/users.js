@@ -4,43 +4,47 @@ const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const User = require("../models/user.model");
 
-router.post("/register", async (req, res) => {
+// Signup route
+router.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+
   try {
-    let { email, password, passwordCheck, displayName } = req.body;
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
 
-    // validate
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists.",
+      });
+    }
 
-    if (!email || !password || !passwordCheck)
-      return res.status(400).json({ msg: "Not all fields have been entered." });
-    if (password.length < 5)
-      return res
-        .status(400)
-        .json({ msg: "The password needs to be at least 5 characters long." });
-    if (password !== passwordCheck)
-      return res
-        .status(400)
-        .json({ msg: "Enter the same password twice for verification." });
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser)
-      return res
-        .status(400)
-        .json({ msg: "An account with this email already exists." });
-
-    if (!displayName) displayName = email;
-
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(password, salt);
-
+    // Create new user
     const newUser = new User({
+      name,
       email,
-      password: passwordHash,
-      displayName,
+      password: hashedPassword,
     });
-    const savedUser = await newUser.save();
-    res.json(savedUser);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    // Save new user
+    await newUser.save();
+
+    // Respond with success
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully.",
+    });
+  } catch (error) {
+    // Handle errors
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred.",
+    });
   }
 });
 
@@ -62,7 +66,7 @@ router.post("/login", async (req, res) => {
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials." });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    console.log("token",token);
+    console.log("token", token);
     res.json({
       token,
       user: {
@@ -74,7 +78,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.delete("/delete", auth, async (req, res) => {
   try {

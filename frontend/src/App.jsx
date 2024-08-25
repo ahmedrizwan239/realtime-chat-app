@@ -1,10 +1,10 @@
-import { Button } from '@chakra-ui/react'
+import SignupLogin from './components/SignupLogin'
 
 function App() {
 
   return (
     <>
-      <Button colorScheme='teal'>Chat</Button>
+      <SignupLogin/>
     </>
   )
 }

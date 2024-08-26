@@ -48,6 +48,50 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// Login Route
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid email or password!" });
+    }
+
+    console.log(user);
+
+    // Check if the user signed up with credentials
+    if (user.provider !== "credentials") {
+      return res.status(400).json({ success: false, message: "Please use another method to sign in!" });
+    }
+
+    // Compare the password with the hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Invalid email or password!" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    // Respond with the token and user details
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "An unexpected error occurred.", error: err.message });
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;

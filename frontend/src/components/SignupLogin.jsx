@@ -17,14 +17,15 @@ import {
   InputGroup,
   InputRightElement
 } from '@chakra-ui/react';
+import { login } from '../authService';
 
 const SignupLogin = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [storedName, setStoredName] = useState('');
-  const [storedEmail, setStoredEmail] = useState('');
-  const [storedPassword, setStoredPassword] = useState('');
+  // const [storedName, setStoredName] = useState('');
+  // const [storedEmail, setStoredEmail] = useState('');
+  // const [storedPassword, setStoredPassword] = useState('');
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,9 +33,9 @@ const SignupLogin = () => {
 
   const handleSignUp = (e) => {
     e.preventDefault();
-    setStoredName(name);
-    setStoredEmail(email);
-    setStoredPassword(password);
+    // setStoredName(name);
+    // setStoredEmail(email);
+    // setStoredPassword(password);
     setIsSignedUp(true);
     setError('');
     setName('');
@@ -51,29 +52,30 @@ const SignupLogin = () => {
     });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === storedEmail && password === storedPassword) {
-      setError('');
-      toast({
-        title: "Login successful.",
-        description: `Welcome, ${storedName}!`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
-    } else {
-      setError('Invalid credentials');
-      toast({
-        title: "Login failed.",
-        description: "Invalid credentials.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
-      });
-    }
+    await login(email, password )
+    // if (email === storedEmail && password === storedPassword) {
+    //   setError('');
+    //   toast({
+    //     title: "Login successful.",
+    //     description: `Welcome, ${storedName}!`,
+    //     status: "success",
+    //     duration: 5000,
+    //     isClosable: true,
+    //     position: "top-right",
+    //   });
+    // } else {
+    //   setError('Invalid credentials');
+    //   toast({
+    //     title: "Login failed.",
+    //     description: "Invalid credentials.",
+    //     status: "error",
+    //     duration: 5000,
+    //     isClosable: true,
+    //     position: "top-right",
+    //   });
+    // }
     setEmail('');
     setPassword('');
   };

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons';
-import bgImage from '../assets/bg.svg';
+import { useState } from "react";
+import { ViewOffIcon, ViewIcon } from "@chakra-ui/icons";
+import bgImage from "../assets/bg.svg";
 import {
   Box,
   Button,
@@ -15,67 +15,80 @@ import {
   useToast,
   IconButton,
   InputGroup,
-  InputRightElement
-} from '@chakra-ui/react';
+  InputRightElement,
+} from "@chakra-ui/react";
+import { Login, Signup } from "../services/authService";
+import { showToast } from "../utils/toast";
 
 const SignupLogin = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [storedName, setStoredName] = useState('');
-  const [storedEmail, setStoredEmail] = useState('');
-  const [storedPassword, setStoredPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSignedUp, setIsSignedUp] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const toast = useToast();
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    setStoredName(name);
-    setStoredEmail(email);
-    setStoredPassword(password);
-    setIsSignedUp(true);
-    setError('');
-    setName('');
-    setEmail('');
-    setPassword('');
+    setError("");
+    setLoading(true);
 
-    toast({
-      title: "Signed up.",
-      description: "You have successfully signed up.",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-      position: "top-right",
-    });
+    try {
+      const response = await Signup(name, email, password);
+
+      showToast(toast, {
+        title: "Signup successful.",
+        description: `Welcome, ${
+          response.message || "You have successfully signed up."
+        }!`,
+        status: "success",
+      });
+      // Clear form fields
+      setName("");
+      setEmail("");
+      setPassword("");
+      // Navigate to signin
+      setIsSignedUp(true);
+    } catch (error) {
+      setError(error.message);
+      showToast({
+        title: "Signup failed.",
+        description: error.message,
+        status: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === storedEmail && password === storedPassword) {
-      setError('');
-      toast({
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await Login(email, password);
+      showToast(toast, {
         title: "Login successful.",
-        description: `Welcome, ${storedName}!`,
+        description: `Welcome, ${response.user.name || "user"}!`,
         status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
       });
-    } else {
-      setError('Invalid credentials');
-      toast({
+      // Clear form fields
+      setEmail("");
+      setPassword("");
+    } catch (error) {
+      showToast(toast, {
         title: "Login failed.",
-        description: "Invalid credentials.",
+        description: error.message,
         status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right",
       });
+      // Handle additional logic like redirecting the user
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-    setEmail('');
-    setPassword('');
   };
 
   return (
@@ -100,7 +113,7 @@ const SignupLogin = () => {
             Welcome
           </Heading>
           <Text textAlign="center" mb={4} fontSize="lg" color="gray.600">
-            {isSignedUp ? 'Log in to continue' : 'Sign up to continue'}
+            {isSignedUp ? "Log in to continue" : "Sign up to continue"}
           </Text>
           <Stack spacing={4}>
             <form onSubmit={isSignedUp ? handleLogin : handleSignUp}>
@@ -132,7 +145,7 @@ const SignupLogin = () => {
                 <FormLabel>Password:</FormLabel>
                 <InputGroup>
                   <Input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
@@ -142,7 +155,9 @@ const SignupLogin = () => {
                   <InputRightElement>
                     <IconButton
                       variant="link"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
                       onClick={() => setShowPassword(!showPassword)}
                     />
@@ -168,6 +183,7 @@ const SignupLogin = () => {
                 size="lg"
                 type="submit"
                 borderRadius="md"
+                isLoading={loading}
               >
                 {isSignedUp ? "Login" : "Sign Up"}
               </Button>
@@ -179,7 +195,7 @@ const SignupLogin = () => {
               fontWeight="medium"
               onClick={() => setIsSignedUp(!isSignedUp)}
             >
-              {isSignedUp ? 'Switch to Signup' : 'Switch to Login'}
+              {isSignedUp ? "Switch to Signup" : "Switch to Login"}
             </Button>
           </Stack>
         </Box>

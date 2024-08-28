@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { Login, Signup } from "../services/authService";
 import { showToast } from "../utils/toast";
+import { useNavigate } from "react-router-dom";
 
 const SignupLogin = () => {
   const [name, setName] = useState("");
@@ -29,6 +30,7 @@ const SignupLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -78,13 +80,14 @@ const SignupLogin = () => {
       // Clear form fields
       setEmail("");
       setPassword("");
+      // Navigate to OTP page
+      navigate("/otp"); // Replace "/otp" with your actual OTP route
     } catch (error) {
       showToast(toast, {
         title: "Login failed.",
         description: error.message,
         status: "error",
       });
-      // Handle additional logic like redirecting the user
       setError(error.message);
     } finally {
       setLoading(false);

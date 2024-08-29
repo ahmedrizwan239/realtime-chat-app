@@ -16,6 +16,7 @@ const transporter = nodemailer.createTransport({
 // Send OTP
 router.post('/send-otp', async (req, res) => {
   const { email } = req.body;
+  console.log(email);
   if (!email) {
     return res.status(400).json({ error: 'Email is required' });
   }
@@ -24,9 +25,12 @@ router.post('/send-otp', async (req, res) => {
     // Generate OTP
     const otp = crypto.randomInt(1000, 9999).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
+    console.log(otp)
+
 
     // Save OTP to database
     await Otp.findOneAndUpdate(
+
       { email },
       { otp, expiresAt },
       { upsert: true, new: true }

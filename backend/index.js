@@ -29,7 +29,7 @@ mongoose.connect(
 );
 
 // set up routes
-
+app.use("/otp", require("./routes/otp"));
 app.use("/users", require("./routes/users"));
 app.use("/todos", require("./routes/todo"));
 

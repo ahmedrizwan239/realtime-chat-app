@@ -1,12 +1,11 @@
-const express = require('express');
+const router = require('express').Router();
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const Otp = require('../models/otp');
-const router = express.Router();
 
 // Setup nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // You can use other email services
+  service: 'gmail', 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -16,7 +15,6 @@ const transporter = nodemailer.createTransport({
 // Send OTP
 router.post('/send-otp', async (req, res) => {
   const { email } = req.body;
-  console.log(email);
   if (!email) {
     return res.status(400).json({ error: 'Email is required' });
   }
@@ -25,9 +23,7 @@ router.post('/send-otp', async (req, res) => {
     // Generate OTP
     const otp = crypto.randomInt(1000, 9999).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
-    console.log(otp)
-
-
+    
     // Save OTP to database
     await Otp.findOneAndUpdate(
 
@@ -45,9 +41,9 @@ router.post('/send-otp', async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'OTP sent successfully' });
+    return res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to send OTP' });
+    return res.status(500).json({ error: 'Failed to send OTP' });
   }
 });
 

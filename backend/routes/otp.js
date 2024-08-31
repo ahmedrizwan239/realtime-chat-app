@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const Otp = require('../models/otp');
+const Otp = require('../models/otp.model');
 
 // Setup nodemailer
 const transporter = nodemailer.createTransport({
@@ -40,11 +40,14 @@ router.post('/send-otp', async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+
     return res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: 'Failed to send OTP' });
   }
 });
+
 
 // Validate OTP
 router.post('/validate-otp', async (req, res) => {

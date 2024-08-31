@@ -40,7 +40,6 @@ router.post("/signup", async (req, res) => {
     });
   } catch (error) {
     // Handle errors
-    console.log(error.message);
     return res.status(500).json({
       success: false,
       message: "An unexpected error occurred.",

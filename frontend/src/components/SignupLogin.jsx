@@ -17,7 +17,7 @@ import {
   InputGroup,
   InputRightElement,
 } from "@chakra-ui/react";
-import { Login, Signup } from "../services/authService";
+import { Login, sendOtp, Signup } from "../services/authService";
 import { showToast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 
@@ -52,18 +52,18 @@ const SignupLogin = () => {
       setEmail("");
       setPassword("");
 
+      const res = await sendOtp(email);
+      showToast(toast, {
+        title: res.message,
+        description: "Please check your email.",
+        status: "success",
+      });
      // Navigate to OTP page
      navigate("/otp"); 
     } catch (error) {
       setError(error.message);
       showToast({
         title: "Signup failed.",
-        description: error.message,
-        status: "error",
-      });
-
-      showToast(toast, {
-        title: "Login failed.",
         description: error.message,
         status: "error",
       });
@@ -87,11 +87,14 @@ const SignupLogin = () => {
       // Clear form fields
       setEmail("");
       setPassword("");
-      // Navigate to OTP page
      
     } catch (error) {
-      
       setError(error.message);
+      showToast(toast, {
+        title: "Login failed.",
+        description: error.message,
+        status: "error",
+      });
     } finally {
       setLoading(false);
     }

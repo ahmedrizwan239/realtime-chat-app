@@ -40,9 +40,33 @@ export const Signup = async (name, email, password) => {
       throw new Error(data.message || `Signup failed with status ${response.status}`);
     }
 
+    localStorage.setItem('email', email);
     return data;
   } catch (error) {
     console.error('Signup error:', error); 
+    throw error;
+  }
+};
+
+// Function to send OTP
+export const sendOtp = async (email) => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/otp/send-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Failed to send OTP`);
+    }
+    return data;
+  } catch (error) {
+    console.error('Error sending OTP:', error);
     throw error;
   }
 };
@@ -59,11 +83,10 @@ export const verifyOtp = async (otp) => {
     });
 
     const data = await response.json();
-
     if (!response.ok) {
       throw new Error(data.message || `Failed to verify OTP with status ${response.status}`);
     }
-
+    localStorage.removeItem('email');
     return data;
   } catch (error) {
     console.error('Error verifying OTP:', error);

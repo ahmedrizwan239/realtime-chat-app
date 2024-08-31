@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Container, Heading, PinInput, PinInputField, Text, Flex, useToast, VStack } from '@chakra-ui/react';
 import bgImage from '../assets/bg.svg';
+import { sendOtp } from '../services/authService';
+import { showToast } from '../utils/toast';
 
 export default function OTP() {
   const [otp, setOtp] = useState('');
@@ -25,30 +27,19 @@ export default function OTP() {
     setOtp(value);
   };
 
-  const handleResend = async () => {
-    if (timeLeft > 0) {
-      toast({
-        title: 'Wait Before Resending',
-        description: `Please wait ${timeLeft} seconds before requesting a new OTP.`,
-        status: 'info',
-        position: 'top-right',
-        duration: 3000,
-      });
-      return;
-    }
 
+  const handleResend = async () => {
+    setError("");
+    const email = localStorage.getItem('email');
     setLoading(true);
     try {
-      // Implement resend OTP logic here
-      console.log('Resend OTP');
-      toast({
-        title: 'OTP Resent',
-        description: 'A new OTP has been sent to your email.',
-        status: 'success',
-        position: 'top-right',
-        duration: 3000,
+      const res = await sendOtp(email);
+      showToast(toast, {
+        title: res.message,
+        description: "A new OTP has been sent to your email.",
+        status: "success",
       });
-      setTimeLeft(15); // Reset the timer for 15 seconds
+      setTimeLeft(30); 
     } catch (error) {
       toast({
         title: 'Resend Failed',
@@ -115,14 +106,23 @@ export default function OTP() {
                 {error}
               </Box>
             )}
+             <Button
+              colorScheme="blue"
+              width="full"
+              size="lg"
+              borderRadius="md"
+              isLoading={loading}
+            >
+              Verify
+            </Button>
             <Button
+              variant={'outline'}
               colorScheme="blue"
               width="full"
               size="lg"
               onClick={handleResend}
               borderRadius="md"
-              isLoading={loading}
-              isDisabled={timeLeft > 0}
+              isDisabled={timeLeft > 0 || loading}
             >
               {timeLeft > 0 ? `Resend OTP (${timeLeft}s)` : 'Resend OTP'}
             </Button>

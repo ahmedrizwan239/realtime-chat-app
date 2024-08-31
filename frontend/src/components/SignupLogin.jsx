@@ -51,12 +51,19 @@ const SignupLogin = () => {
       setName("");
       setEmail("");
       setPassword("");
-      // Navigate to signin
-      setIsSignedUp(true);
+
+     // Navigate to OTP page
+     navigate("/otp"); 
     } catch (error) {
       setError(error.message);
       showToast({
         title: "Signup failed.",
+        description: error.message,
+        status: "error",
+      });
+
+      showToast(toast, {
+        title: "Login failed.",
         description: error.message,
         status: "error",
       });
@@ -81,13 +88,9 @@ const SignupLogin = () => {
       setEmail("");
       setPassword("");
       // Navigate to OTP page
-      navigate("/otp"); // Replace "/otp" with your actual OTP route
+     
     } catch (error) {
-      showToast(toast, {
-        title: "Login failed.",
-        description: error.message,
-        status: "error",
-      });
+      
       setError(error.message);
     } finally {
       setLoading(false);

@@ -5,7 +5,7 @@ const Otp = require('../models/otp');
 
 // Setup nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail', 
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -26,7 +26,6 @@ router.post('/send-otp', async (req, res) => {
     
     // Save OTP to database
     await Otp.findOneAndUpdate(
-
       { email },
       { otp, expiresAt },
       { upsert: true, new: true }
@@ -50,6 +49,7 @@ router.post('/send-otp', async (req, res) => {
 // Validate OTP
 router.post('/validate-otp', async (req, res) => {
   const { email, otp } = req.body;
+  
   if (!email || !otp) {
     return res.status(400).json({ error: 'Email and OTP are required' });
   }
@@ -64,6 +64,7 @@ router.post('/validate-otp', async (req, res) => {
     await Otp.deleteOne({ email, otp }); // Remove OTP after validation
     res.status(200).json({ message: 'OTP validated successfully' });
   } catch (error) {
+    console.error('Failed to validate OTP:', error); // Logging for debugging
     res.status(500).json({ error: 'Failed to validate OTP' });
   }
 });

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Container, Heading, PinInput, PinInputField, Text, Flex, useToast, VStack } from '@chakra-ui/react';
 import bgImage from '../assets/bg.svg';
-import { sendOtp } from '../services/authService';
+import { sendOtp, verifyOtp } from '../services/authService';
 import { showToast } from '../utils/toast';
 
 export default function OTP() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [timeLeft, setTimeLeft] = useState(0); 
+  const [timeLeft, setTimeLeft] = useState(0);
   const toast = useToast();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function OTP() {
         description: "A new OTP has been sent to your email.",
         status: "success",
       });
-      setTimeLeft(30); 
+      setTimeLeft(30);
     } catch (error) {
       toast({
         title: 'Resend Failed',
@@ -53,6 +53,33 @@ export default function OTP() {
       setLoading(false);
     }
   };
+
+  const handleVerify = async () => {
+    setError("");
+    setLoading(true);
+    const email = localStorage.getItem('email');
+    try {
+      const res = await verifyOtp({ otp, email });
+      showToast(toast, {
+        title: res.message,
+        description: "OTP has been verified successfully.",
+        status: "success",
+      });
+      // Redirect or perform actions after successful verification
+    } catch (error) {
+      toast({
+        title: 'Verification Failed',
+        description: 'Failed to verify OTP. Please try again.',
+        status: 'error',
+        position: 'top-right',
+        duration: 3000,
+      });
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <Flex
@@ -106,12 +133,13 @@ export default function OTP() {
                 {error}
               </Box>
             )}
-             <Button
+            <Button
               colorScheme="blue"
               width="full"
               size="lg"
               borderRadius="md"
               isLoading={loading}
+              onClick={handleVerify}
             >
               Verify
             </Button>

@@ -54,7 +54,7 @@ router.post('/validate-otp', async (req, res) => {
   const { email, otp } = req.body;
   
   if (!email || !otp) {
-    return res.status(400).json({ error: 'Email and OTP are required' });
+    return res.status(400).json({ error:'OTP has expired. Please request a new one.' });
   }
 
   try {

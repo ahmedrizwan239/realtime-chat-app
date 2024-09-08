@@ -9,8 +9,26 @@ export default function OTP() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
+  const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
 
+  // Function to mask the email address
+  function maskEmail(email) {
+    const [localPart, domain] = email.split('@');
+    const visibleChars = 2;
+    const maskedLocalPart = localPart.slice(0, visibleChars) + '*'.repeat(localPart.length - visibleChars);
+    return `${maskedLocalPart}@${domain}`;
+  }
+
+  // Retrieve and mask the email when the component mounts
+  useEffect(() => {
+    const email = localStorage.getItem('email');
+    if (email) {
+      setMaskedEmail(maskEmail(email));
+    }
+  }, []);
+
+  // Handle the countdown timer for OTP resend
   useEffect(() => {
     let timer;
     if (timeLeft > 0) {
@@ -23,11 +41,12 @@ export default function OTP() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
+  // Handle OTP input change
   const handleChange = (value) => {
     setOtp(value);
   };
 
-
+  // Handle OTP resend
   const handleResend = async () => {
     setError("");
     const email = localStorage.getItem('email');
@@ -54,6 +73,7 @@ export default function OTP() {
     }
   };
 
+  // Handle OTP verification
   const handleVerify = async () => {
     setError("");
     setLoading(true);
@@ -80,7 +100,6 @@ export default function OTP() {
     }
   };
 
-
   return (
     <Flex
       minH="100vh"
@@ -104,7 +123,7 @@ export default function OTP() {
             Verify OTP
           </Heading>
           <Text textAlign="center" mb={4} fontSize="lg" color="gray.600">
-            Enter the 4-digit code sent to your email.
+            Enter the 4-digit code sent to your email: {maskedEmail}
           </Text>
           <VStack spacing={4}>
             <Box borderWidth={1} borderRadius="md" p={4} boxShadow="md" borderColor="blue.300">

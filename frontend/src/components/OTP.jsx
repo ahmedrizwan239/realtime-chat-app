@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Button, Container, Heading, PinInput, PinInputField, Text, Flex, useToast, VStack } from '@chakra-ui/react';
 import bgImage from '../assets/bg.svg';
 import { sendOtp, verifyOtp } from '../services/authService';
 import { showToast } from '../utils/toast';
+import { AuthContext } from '../services/authContext'; // Import AuthContext
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 export default function OTP() {
   const [otp, setOtp] = useState('');
@@ -11,16 +13,9 @@ export default function OTP() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
+  const { setIsOTPVerified } = useContext(AuthContext); // Access context to update OTP status
+  const navigate = useNavigate(); // Initialize the navigate hook
 
-  // Function to mask the email address
-  function maskEmail(email) {
-    const [localPart, domain] = email.split('@');
-    const visibleChars = 2;
-    const maskedLocalPart = localPart.slice(0, visibleChars) + '*'.repeat(localPart.length - visibleChars);
-    return `${maskedLocalPart}@${domain}`;
-  }
-
-  // Retrieve and mask the email when the component mounts
   useEffect(() => {
     const email = localStorage.getItem('email');
     if (email) {
@@ -28,7 +23,6 @@ export default function OTP() {
     }
   }, []);
 
-  // Handle the countdown timer for OTP resend
   useEffect(() => {
     let timer;
     if (timeLeft > 0) {
@@ -41,12 +35,17 @@ export default function OTP() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Handle OTP input change
+  const maskEmail = (email) => {
+    const [localPart, domain] = email.split('@');
+    const visibleChars = 2;
+    const maskedLocalPart = localPart.slice(0, visibleChars) + '*'.repeat(localPart.length - visibleChars);
+    return `${maskedLocalPart}@${domain}`;
+  };
+
   const handleChange = (value) => {
     setOtp(value);
   };
 
-  // Handle OTP resend
   const handleResend = async () => {
     setError("");
     const email = localStorage.getItem('email');
@@ -73,7 +72,6 @@ export default function OTP() {
     }
   };
 
-  // Handle OTP verification
   const handleVerify = async () => {
     setError("");
     setLoading(true);
@@ -85,7 +83,8 @@ export default function OTP() {
         description: "OTP has been verified successfully.",
         status: "success",
       });
-      // Redirect or perform actions after successful verification
+      setIsOTPVerified(true); // Update OTP verified status
+      navigate("/"); // Redirect to login after successful verification
     } catch (error) {
       toast({
         title: 'Verification Failed',

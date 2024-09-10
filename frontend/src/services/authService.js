@@ -84,7 +84,7 @@ export const verifyOtp = async ({ otp, email }) => {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || `Failed to verify OTP with status ${response.status}`);
+      throw new Error(data.error || `Failed to verify OTP.`);
     }
     localStorage.removeItem('email');
     return data;

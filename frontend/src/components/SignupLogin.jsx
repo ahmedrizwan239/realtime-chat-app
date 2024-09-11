@@ -1,4 +1,3 @@
-// src/components/SignupLogin.jsx
 import { useState, useContext } from "react";
 import { ViewOffIcon, ViewIcon } from "@chakra-ui/icons";
 import bgImage from "../assets/bg.svg";
@@ -21,7 +20,6 @@ import {
 import { Login, sendOtp, Signup } from "../services/authService";
 import { showToast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../services/authContext"; // Import AuthContext
 
 const SignupLogin = () => {
   const [name, setName] = useState("");
@@ -33,7 +31,6 @@ const SignupLogin = () => {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
-  const { isOTPVerified } = useContext(AuthContext); // Access OTP verification status
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -60,7 +57,7 @@ const SignupLogin = () => {
         description: "Please check your email.",
         status: "success",
       });
-      localStorage.setItem('email', email); // Store email in localStorage for OTP use
+      localStorage.setItem("email", email);
       navigate("/otp");
     } catch (error) {
       setError(error.message);
@@ -123,15 +120,11 @@ const SignupLogin = () => {
             Welcome
           </Heading>
           <Text textAlign="center" mb={4} fontSize="lg" color="gray.600">
-            {!isOTPVerified
-              ? isSignedUp
-                ? "Log in to continue"
-                : "Sign up to continue"
-              : "Login to continue"} {/* OTP verified users see login form */}
+            {isSignedUp ? "Login to continue" : "Sign up to continue"}
           </Text>
           <Stack spacing={4}>
-            <form onSubmit={isOTPVerified ? handleLogin : handleSignUp}>
-              {!isSignedUp && !isOTPVerified && (
+            <form onSubmit={isSignedUp ? handleLogin : handleSignUp}>
+              {!isSignedUp && (
                 <FormControl id="name" isRequired mb={4}>
                   <FormLabel>Name:</FormLabel>
                   <Input
@@ -199,7 +192,7 @@ const SignupLogin = () => {
                 borderRadius="md"
                 isLoading={loading}
               >
-                {isOTPVerified ? "Login" : isSignedUp ? "Login" : "Sign Up"}
+                {isSignedUp ? "Login" : "Sign Up"}
               </Button>
             </form>
             <Button
@@ -209,7 +202,9 @@ const SignupLogin = () => {
               fontWeight="medium"
               onClick={() => setIsSignedUp(!isSignedUp)}
             >
-              {isOTPVerified ? "" : isSignedUp ? "Switch to Signup" : "Switch to Login"}
+              {isSignedUp
+                ? "Switch to Signup"
+                : "Switch to Login"}
             </Button>
           </Stack>
         </Box>

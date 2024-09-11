@@ -13,8 +13,7 @@ export default function OTP() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
-  const { setIsOTPVerified } = useContext(AuthContext); // Access context to update OTP status
-  const navigate = useNavigate(); // Initialize the navigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const email = localStorage.getItem('email');
@@ -83,7 +82,6 @@ export default function OTP() {
         description: "OTP has been verified successfully.",
         status: "success",
       });
-      setIsOTPVerified(true); // Update OTP verified status
       navigate("/"); // Redirect to login after successful verification
     } catch (error) {
       toast({

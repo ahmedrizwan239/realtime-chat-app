@@ -17,18 +17,20 @@ import {
   InputGroup,
   InputRightElement,
 } from "@chakra-ui/react";
-import { Login, Signup } from "../services/authService";
+import { Login, sendOtp, Signup } from "../services/authService";
 import { showToast } from "../utils/toast";
+import { useNavigate } from "react-router-dom";
 
 const SignupLogin = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isSignedUp, setIsSignedUp] = useState(true);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -49,8 +51,15 @@ const SignupLogin = () => {
       setName("");
       setEmail("");
       setPassword("");
-      // Navigate to signin
-      setIsSignedUp(true);
+
+      const res = await sendOtp(email);
+      showToast(toast, {
+        title: res.message,
+        description: "Please check your email.",
+        status: "success",
+      });
+     // Navigate to OTP page
+     navigate("/otp"); 
     } catch (error) {
       setError(error.message);
       showToast({
@@ -78,14 +87,14 @@ const SignupLogin = () => {
       // Clear form fields
       setEmail("");
       setPassword("");
+     
     } catch (error) {
+      setError(error.message);
       showToast(toast, {
         title: "Login failed.",
         description: error.message,
         status: "error",
       });
-      // Handle additional logic like redirecting the user
-      setError(error.message);
     } finally {
       setLoading(false);
     }

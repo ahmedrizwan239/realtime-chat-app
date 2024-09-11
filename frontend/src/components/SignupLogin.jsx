@@ -27,7 +27,7 @@ const SignupLogin = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isSignedUp, setIsSignedUp] = useState(true);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

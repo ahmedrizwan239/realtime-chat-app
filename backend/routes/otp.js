@@ -52,15 +52,11 @@ router.post('/send-otp', async (req, res) => {
 // Validate OTP
 router.post('/validate-otp', async (req, res) => {
   const { email, otp } = req.body;
-  
-  if (!email || !otp) {
-    return res.status(400).json({ error:'OTP has expired. Please request a new one.' });
-  }
 
   try {
     const record = await Otp.findOne({ email, otp });
     if (!record || record.expiresAt < Date.now()) {
-      return res.status(400).json({ error: 'Invalid or expired OTP' });
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
     }
 
     // OTP is valid

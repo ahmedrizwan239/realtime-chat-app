@@ -72,7 +72,9 @@ const ChatInterface = () => {
 
                         {/* Chat Messages */}
                         <VStack align="stretch" spacing={3} flexGrow={1} overflowY="auto">
-                            {["Hey, how's it going?", "Looking forward to meeting you.", "See you soon!"].map((msg, idx) => (
+                            {["Hey, how's it going?", "Looking forward to meeting you.", "See you soon!",
+                                "Hey, how's it going?", "Looking forward to meeting you.", "See you soon!","Hey, how's it going?", "Looking forward to meeting you.", "See you soon!",
+                            ].map((msg, idx) => (
                                 <Box key={idx} alignSelf={idx % 2 === 0 ? "flex-start" : "flex-end"} maxW="75%">
                                     <Text
                                         bg={idx % 2 === 0 ? "blue.50" : "blue.500"}

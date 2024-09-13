@@ -87,6 +87,9 @@ const SignupLogin = () => {
       // Clear form fields
       setEmail("");
       setPassword("");
+
+     navigate("/dashboard"); 
+
      
     } catch (error) {
       setError(error.message);

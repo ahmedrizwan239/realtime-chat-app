@@ -3,6 +3,7 @@ import { Box, Button, Container, Heading, PinInput, PinInputField, Text, Flex, u
 import bgImage from '../assets/bg.svg';
 import { sendOtp, verifyOtp } from '../services/authService';
 import { showToast } from '../utils/toast';
+import { useNavigate } from 'react-router-dom'; // Ensure this import is correct
 
 export default function OTP() {
   const [otp, setOtp] = useState('');
@@ -11,6 +12,17 @@ export default function OTP() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
+  const navigate = useNavigate(); // Initialize navigate
+
+
+  // Function to obfuscate email address
+  const obfuscateEmail = (email) => {
+    const [localPart, domainPart] = email.split('@');
+    const obfuscatedLocal = localPart[0] + '*'.repeat(localPart.length - 1);
+    const [domainName, domainExtension] = domainPart.split('.');
+    const obfuscatedDomain = '*'.repeat(domainName.length - 1) + domainName.slice(-1); // Improved obfuscation
+    return `${obfuscatedLocal}@${obfuscatedDomain}.${domainExtension}`;
+  };
 
   // Retrieve and mask the email when the component mounts
   useEffect(() => {
@@ -24,27 +36,14 @@ export default function OTP() {
   useEffect(() => {
     let timer;
     if (timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
+      timer = setInterval(() => setTimeLeft(prevTime => prevTime - 1), 1000);
     } else {
       clearInterval(timer);
     }
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Function to obfuscate email address  
-  const obfuscateEmail = (email) => {
-    const [localPart, domainPart] = email.split('@');
-    const obfuscatedLocal = localPart[0] + '*'.repeat(localPart.length - 1);
-    const [domainName, domainExtension] = domainPart.split('.');
-    const obfuscatedDomain = '*'.repeat(domainName.length - 1) + domainName.slice(5);
-    return `${obfuscatedLocal}@${obfuscatedDomain}.${domainExtension}`;
-  };
-
-  const handleChange = (value) => {
-    setOtp(value);
-  };
+  const handleChange = (value) => setOtp(value);
 
   // Handle OTP resend
   const handleResend = async () => {
@@ -60,14 +59,12 @@ export default function OTP() {
       });
       setTimeLeft(30);
     } catch (error) {
-      toast({
+      showToast(toast, {
         title: 'Resend Failed',
         description: 'Failed to resend OTP. Please try again.',
         status: 'error',
-        position: 'top-right',
-        duration: 3000,
       });
-      setError(error.message);
+      setError('Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -85,14 +82,12 @@ export default function OTP() {
         description: "OTP has been verified successfully.",
         status: "success",
       });
-      // Redirect or perform actions after successful verification
+      navigate("/"); // Redirect to login after successful verification
     } catch (error) {
-      toast({
+      showToast(toast, {
         title: 'Verification Failed',
         description: 'Failed to verify OTP. Please try again.',
         status: 'error',
-        position: 'top-right',
-        duration: 3000,
       });
       setError(error.message);
     } finally {
@@ -163,7 +158,7 @@ export default function OTP() {
               Verify
             </Button>
             <Button
-              variant={'outline'}
+              variant="outline"
               colorScheme="blue"
               width="full"
               size="lg"

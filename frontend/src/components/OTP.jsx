@@ -12,19 +12,11 @@ export default function OTP() {
   const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
 
-  // Function to mask the email address
-  function maskEmail(email) {
-    const [localPart, domain] = email.split('@');
-    const visibleChars = 2;
-    const maskedLocalPart = localPart.slice(0, visibleChars) + '*'.repeat(localPart.length - visibleChars);
-    return `${maskedLocalPart}@${domain}`;
-  }
-
   // Retrieve and mask the email when the component mounts
   useEffect(() => {
     const email = localStorage.getItem('email');
     if (email) {
-      setMaskedEmail(maskEmail(email));
+      setMaskedEmail(obfuscateEmail(email));
     }
   }, []);
 
@@ -33,7 +25,7 @@ export default function OTP() {
     let timer;
     if (timeLeft > 0) {
       timer = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
     } else {
       clearInterval(timer);
@@ -41,7 +33,15 @@ export default function OTP() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Handle OTP input change
+  // Function to obfuscate email address  
+  const obfuscateEmail = (email) => {
+    const [localPart, domainPart] = email.split('@');
+    const obfuscatedLocal = localPart[0] + '*'.repeat(localPart.length - 1);
+    const [domainName, domainExtension] = domainPart.split('.');
+    const obfuscatedDomain = '*'.repeat(domainName.length - 1) + domainName.slice(5);
+    return `${obfuscatedLocal}@${obfuscatedDomain}.${domainExtension}`;
+  };
+
   const handleChange = (value) => {
     setOtp(value);
   };

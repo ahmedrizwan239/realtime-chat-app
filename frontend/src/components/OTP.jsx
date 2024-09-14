@@ -3,48 +3,29 @@ import { Box, Button, Container, Heading, PinInput, PinInputField, Text, Flex, u
 import bgImage from '../assets/bg.svg';
 import { sendOtp, verifyOtp } from '../services/authService';
 import { showToast } from '../utils/toast';
+import { useNavigate } from 'react-router-dom'; 
+import { obfuscateEmail } from '../utils/common';
 
 export default function OTP() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
-  const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
-
-  // Function to mask the email address
-  function maskEmail(email) {
-    const [localPart, domain] = email.split('@');
-    const visibleChars = 2;
-    const maskedLocalPart = localPart.slice(0, visibleChars) + '*'.repeat(localPart.length - visibleChars);
-    return `${maskedLocalPart}@${domain}`;
-  }
-
-  // Retrieve and mask the email when the component mounts
-  useEffect(() => {
-    const email = localStorage.getItem('email');
-    if (email) {
-      setMaskedEmail(maskEmail(email));
-    }
-  }, []);
+  const navigate = useNavigate(); 
 
   // Handle the countdown timer for OTP resend
   useEffect(() => {
     let timer;
     if (timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
+      timer = setInterval(() => setTimeLeft(prevTime => prevTime - 1), 1000);
     } else {
       clearInterval(timer);
     }
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Handle OTP input change
-  const handleChange = (value) => {
-    setOtp(value);
-  };
+  const handleChange = (value) => setOtp(value);
 
   // Handle OTP resend
   const handleResend = async () => {
@@ -60,14 +41,12 @@ export default function OTP() {
       });
       setTimeLeft(30);
     } catch (error) {
-      toast({
+      showToast(toast, {
         title: 'Resend Failed',
         description: 'Failed to resend OTP. Please try again.',
         status: 'error',
-        position: 'top-right',
-        duration: 3000,
       });
-      setError(error.message);
+      setError('Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -85,14 +64,12 @@ export default function OTP() {
         description: "OTP has been verified successfully.",
         status: "success",
       });
-      // Redirect or perform actions after successful verification
+      navigate("/"); // Redirect to login after successful verification
     } catch (error) {
-      toast({
+      showToast(toast, {
         title: 'Verification Failed',
         description: 'Failed to verify OTP. Please try again.',
         status: 'error',
-        position: 'top-right',
-        duration: 3000,
       });
       setError(error.message);
     } finally {
@@ -117,16 +94,15 @@ export default function OTP() {
           borderRadius="xl"
           boxShadow="lg"
           borderWidth="1px"
-          borderColor="blue.300"
         >
           <Heading mb={6} textAlign="center" fontSize="2xl" color="blue.600">
             Verify OTP
           </Heading>
-          <Text textAlign="center" mb={4} fontSize="lg" color="gray.600">
-            Enter the 4-digit code sent to your email: {maskedEmail}
+          <Text textAlign="center" mb={4} fontSize="lg" fontWeight={'medium'} color="gray.600">
+            Enter the 4-digit code sent to your email {obfuscateEmail(localStorage.getItem('email'))}
           </Text>
           <VStack spacing={4}>
-            <Box borderWidth={1} borderRadius="md" p={4} boxShadow="md" borderColor="blue.300">
+            <Box borderWidth={1} borderRadius="md" p={4} boxShadow="md" borderColor="blue.300" mt={4}>
               <PinInput
                 onChange={handleChange}
                 type="number"
@@ -156,6 +132,7 @@ export default function OTP() {
               colorScheme="blue"
               width="full"
               size="lg"
+              mt={4}
               borderRadius="md"
               isLoading={loading}
               onClick={handleVerify}
@@ -163,7 +140,7 @@ export default function OTP() {
               Verify
             </Button>
             <Button
-              variant={'outline'}
+              variant="outline"
               colorScheme="blue"
               width="full"
               size="lg"

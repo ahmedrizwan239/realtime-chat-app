@@ -58,8 +58,8 @@ const SignupLogin = () => {
         description: "Please check your email.",
         status: "success",
       });
-     // Navigate to OTP page
-     navigate("/otp"); 
+      // Navigate to OTP page
+      navigate("/otp");
     } catch (error) {
       setError(error.message);
       showToast({
@@ -87,7 +87,7 @@ const SignupLogin = () => {
       // Clear form fields
       setEmail("");
       setPassword("");
-     
+      navigate("/dashboard");
     } catch (error) {
       setError(error.message);
       showToast(toast, {
@@ -121,7 +121,7 @@ const SignupLogin = () => {
           <Heading mb={6} textAlign="center" fontSize="2xl" color="blue.600">
             Welcome
           </Heading>
-          <Text textAlign="center" mb={4} fontSize="lg" color="gray.600">
+          <Text textAlign="center" mb={4} fontSize="lg" fontWeight={'medium'} color="gray.600">
             {isSignedUp ? "Log in to continue" : "Sign up to continue"}
           </Text>
           <Stack spacing={4}>

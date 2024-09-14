@@ -3,34 +3,16 @@ import { Box, Button, Container, Heading, PinInput, PinInputField, Text, Flex, u
 import bgImage from '../assets/bg.svg';
 import { sendOtp, verifyOtp } from '../services/authService';
 import { showToast } from '../utils/toast';
-import { useNavigate } from 'react-router-dom'; // Ensure this import is correct
+import { useNavigate } from 'react-router-dom'; 
+import { obfuscateEmail } from '../utils/common';
 
 export default function OTP() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
-  const [maskedEmail, setMaskedEmail] = useState('');
   const toast = useToast();
-  const navigate = useNavigate(); // Initialize navigate
-
-
-  // Function to obfuscate email address
-  const obfuscateEmail = (email) => {
-    const [localPart, domainPart] = email.split('@');
-    const obfuscatedLocal = localPart[0] + '*'.repeat(localPart.length - 1);
-    const [domainName, domainExtension] = domainPart.split('.');
-    const obfuscatedDomain = '*'.repeat(domainName.length - 1) + domainName.slice(-1); // Improved obfuscation
-    return `${obfuscatedLocal}@${obfuscatedDomain}.${domainExtension}`;
-  };
-
-  // Retrieve and mask the email when the component mounts
-  useEffect(() => {
-    const email = localStorage.getItem('email');
-    if (email) {
-      setMaskedEmail(obfuscateEmail(email));
-    }
-  }, []);
+  const navigate = useNavigate(); 
 
   // Handle the countdown timer for OTP resend
   useEffect(() => {
@@ -112,16 +94,15 @@ export default function OTP() {
           borderRadius="xl"
           boxShadow="lg"
           borderWidth="1px"
-          borderColor="blue.300"
         >
           <Heading mb={6} textAlign="center" fontSize="2xl" color="blue.600">
             Verify OTP
           </Heading>
-          <Text textAlign="center" mb={4} fontSize="lg" color="gray.600">
-            Enter the 4-digit code sent to your email: {maskedEmail}
+          <Text textAlign="center" mb={4} fontSize="lg" fontWeight={'medium'} color="gray.600">
+            Enter the 4-digit code sent to your email {obfuscateEmail(localStorage.getItem('email'))}
           </Text>
           <VStack spacing={4}>
-            <Box borderWidth={1} borderRadius="md" p={4} boxShadow="md" borderColor="blue.300">
+            <Box borderWidth={1} borderRadius="md" p={4} boxShadow="md" borderColor="blue.300" mt={4}>
               <PinInput
                 onChange={handleChange}
                 type="number"
@@ -151,6 +132,7 @@ export default function OTP() {
               colorScheme="blue"
               width="full"
               size="lg"
+              mt={4}
               borderRadius="md"
               isLoading={loading}
               onClick={handleVerify}

@@ -11,7 +11,7 @@ const ChatInterface = () => {
     return (
         <Flex h="100vh" bg="blue.50">
             {/* Left Sidebar */}
-            <Box w="30%" bg="white" p={4} borderRight="1px solid #cbd5e0" shadow="lg">
+            <Box w="30%" bg="white" p={4} shadow="lg">
                 <VStack align="stretch" spacing={6}>
                     <Text fontSize="2xl" fontWeight="bold" color="blue.700">
                         Messages
@@ -58,20 +58,19 @@ const ChatInterface = () => {
                         <Text color="gray.600" mt={2}>No chats available</Text>
                     </Flex>
                 ) : (
-                    <Flex direction="column" h="100%" bg="white" p={3} shadow="md" borderRadius="md" borderLeft="3px solid #2b6cb0">
+                    <Flex direction="column" h="100%" bg="white" p={3} shadow="md" borderRadius="md">
                         {/* Chat Header */}
                         <Flex direction="column" mb={3} p={3} bg="blue.100" borderRadius="md" shadow="sm">
                             <HStack spacing={3} mb={2}>
                                 <Avatar name="Ahmed" bg="blue.600" size="md" />
                                 <Box>
                                     <Text fontSize="md" fontWeight="bold" color="blue.700">Ahmed</Text>
-                                    <Badge colorScheme="green" mt={1}>Online</Badge>
                                 </Box>
                             </HStack>
                         </Flex>
 
                         {/* Chat Messages */}
-                        <VStack align="stretch" spacing={3} flexGrow={1} overflowY="auto">
+                        <VStack align="stretch" spacing={3} flexGrow={1} overflowY="auto" className='custom-scrollbar'>
                             {["Hey, how's it going?", "Looking forward to meeting you.", "See you soon!",
                                 "Hey, how's it going?", "Looking forward to meeting you.", "See you soon!","Hey, how's it going?", "Looking forward to meeting you.", "See you soon!",
                             ].map((msg, idx) => (

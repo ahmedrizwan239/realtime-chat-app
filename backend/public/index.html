@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App</title>
+  <!-- <script src="/socket.io/socket.io.js"></script> -->
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Chat App</h1>
+
+  <div>
+    <input type="text" id="message" placeholder="Enter message" />
+    <button onclick="sendMessage()">Send Message</button>
+  </div>
+
+  <div>
+    <h3>Chat Messages</h3>
+    <ul id="messages"></ul>
+  </div>
+
+  <script>
+    const socket = io("http://localhost:5000");
+
+    // Join a chat room (use the roomId from earlier)
+    const roomId = "64c42d2c81e903123456789a_64c42d2c81e903123456789b";
+    socket.emit("joinRoom", roomId);
+
+    // Listen for new messages
+    socket.on("privateMessage", (message) => {
+      const messageList = document.getElementById("messages");
+      const listItem = document.createElement("li");
+      listItem.textContent = message.text;
+      messageList.appendChild(listItem);
+    });
+
+    // Send a message
+    function sendMessage() {
+      const message = document.getElementById("message").value;
+      socket.emit("privateMessage", {
+        roomId,
+        message,
+        senderId: "64c42d2c81e903123456789a", // Sender's user ID
+        receiverId: "64c42d2c81e903123456789b" // Receiver's user ID
+      });
+    }
+  </script>
+</body>
+</html>

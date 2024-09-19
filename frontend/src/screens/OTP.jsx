@@ -98,7 +98,7 @@ export default function OTP() {
           <Heading mb={6} textAlign="center" fontSize="2xl" color="blue.600">
             Verify OTP
           </Heading>
-          <Text textAlign="center" mb={4} fontSize="lg" fontFamily="sans-serif" color="gray.600">
+          <Text textAlign="center" mb={4} fontSize="lg" fontWeight={'medium'} color="gray.600">
             Enter the 4-digit code sent to your email {obfuscateEmail(localStorage.getItem('email'))}
           </Text>
           <VStack spacing={4}>

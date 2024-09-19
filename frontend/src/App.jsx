@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import OTP from './components/OTP';
-import SignupLogin from './components/SignupLogin';
-import Dashboard from './components/Dashboard';
+import OTP from './screens/OTP';
+import SignupLogin from './screens/SignupLogin';
+import Dashboard from './screens/Dashboard';
 import './index.css'
 
 function App() {

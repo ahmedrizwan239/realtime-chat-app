@@ -15,7 +15,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",  
-        methods: ["GET", "POST"]
     }
 });
 
@@ -31,6 +30,15 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", (roomId) => {
     socket.join(roomId);
     console.log(`User joined room: ${roomId}`);
+  });
+
+  socket.on("message", async ({ text }) => {
+    const senderId = socket.id;  // Use socket.id as the senderId
+
+    console.log(`Message from ${senderId}: ${text}`);
+
+    // Broadcast the message to all connected clients
+    io.emit("message", { senderId, text });
   });
 
   // Handle sending private messages

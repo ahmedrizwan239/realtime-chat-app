@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { io } from "socket.io-client";
 import {
   Flex,
@@ -14,8 +14,6 @@ import {
 } from "@chakra-ui/react";
 import { FaSmile, FaPaperPlane, FaMoon, FaSun } from "react-icons/fa";
 
-const socket = io("http://localhost:5000");
-
 const Dashboard = () => {
   const [chats, setChats] = useState([
     { name: "Ahmed", lastMessage: "Hi, how are you?", status: "online" },
@@ -29,11 +27,7 @@ const Dashboard = () => {
 
   const toggleColorMode = () => setIsDarkMode(!isDarkMode);
 
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected:", socket.id);
-    });
-  }, []);
+  const socket = useMemo(() => io("http://localhost:5000"), []);
 
   const handleChatSelect = (chat) => {
     setSelectedChat(chat);
@@ -50,9 +44,14 @@ const Dashboard = () => {
     }
   };
 
-  socket.on("message", (data) => {
-    console.log("Message received:", data);
-  });
+  useEffect(() => {
+    socket.on("message", (data) => {
+      console.log("Message received:", data);
+    });
+    return () => {
+      socket.off("message");
+    };
+  }, []);
 
   return (
     <Flex h="100vh">

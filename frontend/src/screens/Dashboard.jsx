@@ -26,8 +26,14 @@ const Dashboard = () => {
   const [message, setMessage] = useState("");
 
   const toggleColorMode = () => setIsDarkMode(!isDarkMode);
+  
+  const socket = useMemo(() => {
+    const token = localStorage.getItem('token'); // Or however you store your JWT
+    return io("http://localhost:5000", {
+      auth: { token : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDM5NmIyOWUwOThjNDYwODk0N2RiZSIsImlhdCI6MTczODgwMDA2OCwiZXhwIjoxNzM5NDA0ODY4fQ.hy-VzEZPAX68Z4zJohV2S9YnE2f37gESQb-TU8S3CLY' }
+    });
+  }, []);
 
-  const socket = useMemo(() => io("http://localhost:5000"), []);
 
   const handleChatSelect = (chat) => {
     setSelectedChat(chat);

@@ -81,7 +81,7 @@ const SignupLogin = () => {
       const response = await Login(email, password);
       showToast(toast, {
         title: "Login successful.",
-        description: `Welcome, ${response.user.name || "user"}!`,
+        description: `Welcome, ${response.data.user.name || "user"}!`,
         status: "success",
       });
       // Clear form fields

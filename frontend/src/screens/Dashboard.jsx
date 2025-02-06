@@ -15,25 +15,48 @@ import {
 import { FaSmile, FaPaperPlane, FaMoon, FaSun } from "react-icons/fa";
 
 const Dashboard = () => {
-  const [chats, setChats] = useState([
-    { name: "Ahmed", lastMessage: "Hi, how are you?", status: "online" },
-    { name: "Uzair", lastMessage: "Hi, how are you?", status: "offline" },
-    { name: "Sameer", lastMessage: "Hi, how are you?", status: "online" },
-    { name: "Ibad", lastMessage: "Hi, how are you?", status: "online" },
-  ]);
+  const currentUserId = "66d398d79e098c4608947dc1"; // Your user ID
   const [selectedChat, setSelectedChat] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [message, setMessage] = useState("");
+  const [chats, setChats] = useState([
+    { id: "66d396b29e098c4608947dbe", name: "Ahmed", lastMessage: "Hi, how are you?", status: "online" },
+    { id: "abc123xyz", name: "Uzair", lastMessage: "Hi, how are you?", status: "offline" },
+    { id: "def456xyz", name: "Sameer", lastMessage: "Hi, how are you?", status: "online" },
+    { id: "ghi789xyz", name: "Ibad", lastMessage: "Hi, how are you?", status: "online" },
+  ]);
+  const [messages, setMessages] = useState([
+    {
+      id: "1",
+      senderId: "66d396b29e098c4608947dbe",
+      text: "Hey, how's it going?",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: "2",
+      senderId: "66d398d79e098c4608947dc1",
+      text: "Hi! I'm good, thanks for asking!",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: "3",
+      senderId: "66d396b29e098c4608947dbe",
+      text: "Glad to hear that!",
+      timestamp: new Date().toISOString(),
+    },
+  ]);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleColorMode = () => setIsDarkMode(!isDarkMode);
-  
+
   const socket = useMemo(() => {
-    const token = localStorage.getItem('token'); // Or however you store your JWT
+    const token = localStorage.getItem("token"); // Or however you store your JWT
     return io("http://localhost:5000", {
-      auth: { token : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDM5NmIyOWUwOThjNDYwODk0N2RiZSIsImlhdCI6MTczODgwMDA2OCwiZXhwIjoxNzM5NDA0ODY4fQ.hy-VzEZPAX68Z4zJohV2S9YnE2f37gESQb-TU8S3CLY' }
+      auth: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDM5NmIyOWUwOThjNDYwODk0N2RiZSIsImlhdCI6MTczODgwMDA2OCwiZXhwIjoxNzM5NDA0ODY4fQ.hy-VzEZPAX68Z4zJohV2S9YnE2f37gESQb-TU8S3CLY",
+      },
     });
   }, []);
-
 
   const handleChatSelect = (chat) => {
     setSelectedChat(chat);
@@ -41,21 +64,43 @@ const Dashboard = () => {
 
   // Function to emit message to the server
   const sendMessage = () => {
-    if (message.trim()) {
-      socket.emit("message", {
+    if (message.trim() && selectedChat) {
+      const newMessage = {
+        id: Date.now().toString(),
+        senderId: currentUserId,
         text: message,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Optimistically add message to state
+      setMessages((prev) => [...prev, newMessage]);
+
+      // Emit to socket
+      socket.emit("privateMessage", {
+        receiverId: selectedChat.id,
+        message: message,
       });
-      console.log("Message sent:", message);
-      setMessage(""); // Clear input after sending
+
+      setMessage("");
     }
   };
 
   useEffect(() => {
-    socket.on("message", (data) => {
+    socket.on("privateMessage", (data) => {
       console.log("Message received:", data);
+
+      const newMessage = {
+        id: data._id || Date.now().toString(),
+        senderId: data.senderId,
+        text: data.text,
+        timestamp: data.createdAt || new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, newMessage]);
     });
+
     return () => {
-      socket.off("message");
+      socket.off("privateMessage");
     };
   }, []);
 
@@ -95,8 +140,8 @@ const Dashboard = () => {
             bg={isDarkMode ? "gray.700" : "white"}
             color={isDarkMode ? "white" : "black"}
           />
-          <Button colorScheme="blue" variant="solid" borderRadius="full">
-            New Group +
+          <Button colorScheme="blue" variant="solid" borderRadius="full" isDisabled>
+           + New Group (Coming Soon)
           </Button>
 
           {chats.length === 0 ? (
@@ -225,41 +270,35 @@ const Dashboard = () => {
               overflowY="auto"
               className="custom-scrollbar"
             >
-              {[
-                "Hey, how's it going?",
-                "Looking forward to meeting you.",
-                "See you soon!",
-                "Hey, how's it going?",
-                "Looking forward to meeting you.",
-                "See you soon!",
-                "Hey, how's it going?",
-                "Looking forward to meeting you.",
-                "See you soon!",
-              ].map((msg, idx) => (
-                <Box
-                  key={idx}
-                  alignSelf={idx % 2 === 0 ? "flex-start" : "flex-end"}
-                  maxW="75%"
-                >
-                  <Text
-                    bg={
-                      idx % 2 === 0
-                        ? isDarkMode
+              {messages.map((msg, idx) => {
+                const isMyMessage = msg.senderId === currentUserId;
+
+                return (
+                  <Box
+                    key={idx}
+                    alignSelf={isMyMessage ? "flex-end" : "flex-start"}
+                    maxW="75%"
+                  >
+                    <Text
+                      bg={
+                        isMyMessage
+                          ? "blue.500"
+                          : isDarkMode
                           ? "gray.700"
                           : "blue.50"
-                        : "blue.500"
-                    }
-                    color={
-                      idx % 2 === 0 ? (isDarkMode ? "white" : "black") : "white"
-                    }
-                    p={3}
-                    borderRadius="lg"
-                    shadow="md"
-                  >
-                    {msg}
-                  </Text>
-                </Box>
-              ))}
+                      }
+                      color={
+                        isMyMessage ? "white" : isDarkMode ? "white" : "black"
+                      }
+                      p={3}
+                      borderRadius="lg"
+                      shadow="md"
+                    >
+                      {msg.text}
+                    </Text>
+                  </Box>
+                );
+              })}
             </VStack>
 
             {/* Chat Input */}

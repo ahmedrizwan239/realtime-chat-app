@@ -15,7 +15,6 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "User already exists.",
-        data: null,
       });
     }
 
@@ -33,13 +32,11 @@ router.post("/signup", async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "User created successfully.",
-      data: newUser,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "An unexpected error occurred.",
-      data: null,
     });
   }
 });
@@ -55,7 +52,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "User not found!",
-        data: null,
       });
     }
 
@@ -63,7 +59,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please use another method to sign in!",
-        data: null,
       });
     }
 
@@ -72,22 +67,21 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid credentials!",
-        data: null,
       });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const { password: _, ...userWithoutPassword } = user.toObject();
 
     res.json({
       success: true,
       message: "Login successful.",
-      data: { user, token },
+      data: { user:userWithoutPassword, token },
     });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: "An unexpected error occurred.",
-      data: null,
     });
   }
 });
@@ -100,20 +94,17 @@ router.delete("/delete", auth, async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "User not found.",
-        data: null,
       });
     }
 
     res.json({
       success: true,
       message: "User deleted successfully.",
-      data: deletedUser,
     });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: "An unexpected error occurred.",
-      data: null,
     });
   }
 });
@@ -121,12 +112,11 @@ router.delete("/delete", auth, async (req, res) => {
 // Get user details
 router.get("/", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user);
+    const user = await User.findById(req.user).select("-password");
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found.",
-        data: null,
       });
     }
 
@@ -139,7 +129,24 @@ router.get("/", auth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "An unexpected error occurred.",
-      data: null,
+    });
+  }
+});
+
+// Get all users
+router.get("/all", auth, async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); 
+
+    res.json({
+      success: true,
+      message: "Users retrieved successfully.",
+      data: users,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred.",
     });
   }
 });

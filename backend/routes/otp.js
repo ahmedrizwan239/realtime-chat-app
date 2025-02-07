@@ -16,7 +16,10 @@ const transporter = nodemailer.createTransport({
 router.post('/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+    return res.status(400).json({
+      success: false,
+      message: 'Email is required',
+    });
   }
 
   try {
@@ -41,13 +44,18 @@ router.post('/send-otp', async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    return res.status(200).json({ message: 'OTP sent successfully' });
+    return res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully',
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Failed to send OTP' });
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to send OTP',
+    });
   }
 });
-
 
 // Validate OTP
 router.post('/validate-otp', async (req, res) => {
@@ -56,15 +64,23 @@ router.post('/validate-otp', async (req, res) => {
   try {
     const record = await Otp.findOne({ email, otp });
     if (!record || record.expiresAt < Date.now()) {
-      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired. Please request a new one.',
+      });
     }
 
     // OTP is valid
-    await Otp.deleteOne({ email, otp }); // Remove OTP after validation
-    res.status(200).json({ message: 'OTP validated successfully' });
+    await Otp.deleteOne({ email, otp }); 
+    res.status(200).json({
+      success: true,
+      message: 'OTP validated successfully',
+    });
   } catch (error) {
-    console.error('Failed to validate OTP:', error); // Logging for debugging
-    res.status(500).json({ error: 'Failed to validate OTP' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate OTP',
+    });
   }
 });
 

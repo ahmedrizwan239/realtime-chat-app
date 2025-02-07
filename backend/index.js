@@ -42,3 +42,4 @@ app.use("/otp", require("./routes/otp"));
 app.use("/users", require("./routes/users"));
 app.use("/todos", require("./routes/todo"));
 app.use("/chat", require("./routes/chat"));
+app.use("/messages", require("./routes/messages"));

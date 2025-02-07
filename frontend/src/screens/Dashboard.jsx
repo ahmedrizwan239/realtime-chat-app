@@ -20,9 +20,9 @@ const Dashboard = () => {
   const [message, setMessage] = useState("");
   const [chats, setChats] = useState([
     { id: "66d396b29e098c4608947dbe", name: "Ahmed", lastMessage: "Hi, how are you?", status: "online" },
-    { id: "abc123xyz", name: "Uzair", lastMessage: "Hi, how are you?", status: "offline" },
-    { id: "def456xyz", name: "Sameer", lastMessage: "Hi, how are you?", status: "online" },
-    { id: "ghi789xyz", name: "Ibad", lastMessage: "Hi, how are you?", status: "online" },
+    { id: "66d396b29e098c4608947dbe", name: "Uzair", lastMessage: "Hi, how are you?", status: "offline" },
+    { id: "66d396b29e098c4608947dbe", name: "Sameer", lastMessage: "Hi, how are you?", status: "online" },
+    { id: "66d396b29e098c4608947dbe", name: "Ibad", lastMessage: "Hi, how are you?", status: "online" },
   ]);
   const [messages, setMessages] = useState([
     {

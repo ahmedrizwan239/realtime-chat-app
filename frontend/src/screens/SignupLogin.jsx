@@ -84,6 +84,8 @@ const SignupLogin = () => {
         description: `Welcome, ${response.data.user.name || "user"}!`,
         status: "success",
       });
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       // Clear form fields
       setEmail("");
       setPassword("");

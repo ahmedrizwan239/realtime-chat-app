@@ -11,19 +11,19 @@ import {
   HStack,
   IconButton,
   Switch,
+  Spinner,
 } from "@chakra-ui/react";
 import { FaSmile, FaPaperPlane, FaMoon, FaSun } from "react-icons/fa";
+import { getAllUsers } from "../services/userService";
 
 const Dashboard = () => {
-  const currentUserId = "66d398d79e098c4608947dc1"; // Your user ID
-  const [selectedChat, setSelectedChat] = useState(null);
+
+  const currentUserId = JSON.parse(localStorage.getItem("user"))?.id || null;
+  const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [chats, setChats] = useState([
-    { id: "66d396b29e098c4608947dbe", name: "Ahmed", lastMessage: "Hi, how are you?", status: "online" },
-    { id: "66d396b29e098c4608947dbe", name: "Uzair", lastMessage: "Hi, how are you?", status: "offline" },
-    { id: "66d396b29e098c4608947dbe", name: "Sameer", lastMessage: "Hi, how are you?", status: "online" },
-    { id: "66d396b29e098c4608947dbe", name: "Ibad", lastMessage: "Hi, how are you?", status: "online" },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([
     {
       id: "1",
@@ -49,22 +49,19 @@ const Dashboard = () => {
   const toggleColorMode = () => setIsDarkMode(!isDarkMode);
 
   const socket = useMemo(() => {
-    const token = localStorage.getItem("token"); // Or however you store your JWT
-    return io("http://localhost:5000", {
-      auth: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDM5NmIyOWUwOThjNDYwODk0N2RiZSIsImlhdCI6MTczODgwMDA2OCwiZXhwIjoxNzM5NDA0ODY4fQ.hy-VzEZPAX68Z4zJohV2S9YnE2f37gESQb-TU8S3CLY",
-      },
+    const token = localStorage.getItem("token"); 
+    return io(import.meta.env.VITE_API_BASE_URL, {
+      auth: { token },
     });
   }, []);
 
-  const handleChatSelect = (chat) => {
-    setSelectedChat(chat);
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
   };
 
   // Function to emit message to the server
   const sendMessage = () => {
-    if (message.trim() && selectedChat) {
+    if (message.trim() && selectedUser) {
       const newMessage = {
         id: Date.now().toString(),
         senderId: currentUserId,
@@ -77,7 +74,7 @@ const Dashboard = () => {
 
       // Emit to socket
       socket.emit("privateMessage", {
-        receiverId: selectedChat.id,
+        receiverId: selectedUser.id,
         message: message,
       });
 
@@ -102,6 +99,26 @@ const Dashboard = () => {
     return () => {
       socket.off("privateMessage");
     };
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await getAllUsers();
+      setUsers(response.data);
+    } catch (error) {
+      showToast(toast, {
+        title: "Error fetching users",
+        description: error.message,
+        status: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   return (
@@ -140,12 +157,23 @@ const Dashboard = () => {
             bg={isDarkMode ? "gray.700" : "white"}
             color={isDarkMode ? "white" : "black"}
           />
-          <Button colorScheme="blue" variant="solid" borderRadius="full" isDisabled>
-           + New Group (Coming Soon)
+          <Button colorScheme="blue" variant="solid" borderRadius="full">
+            + New Group
           </Button>
 
-          {chats.length === 0 ? (
-            // No chats available view
+          {loading ? (
+            <VStack align="center" mt={8} spacing={4}>
+              <Spinner color="blue.500" />
+              <Text
+                fontSize="lg"
+                fontWeight="bold"
+                color={isDarkMode ? "white" : "blue.700"}
+              >
+                Loading Contacts...
+              </Text>
+            </VStack>
+          ) : users.length === 0 ? (
+            // No contacts available view
             <VStack align="center" mt={8} spacing={4}>
               <Avatar size="2xl" bg="blue.600" color="white" />
               <Text
@@ -162,7 +190,7 @@ const Dashboard = () => {
           ) : (
             // Chat list view when chats are available
             <VStack align="stretch" gap={1} mt={4} spacing={4}>
-              {chats.map((chat, idx) => (
+              {users.map((user, idx) => (
                 <HStack
                   key={idx}
                   align="center"
@@ -171,9 +199,9 @@ const Dashboard = () => {
                   p={2}
                   borderRadius="md"
                   cursor="pointer"
-                  onClick={() => handleChatSelect(chat)}
+                  onClick={() => handleUserSelect(user)}
                 >
-                  <Avatar name={chat.name} bg="blue.600" position="relative">
+                  <Avatar name={user.name} bg="blue.600" position="relative">
                     {/* Status Indicator */}
                     <Box
                       position="absolute"
@@ -182,7 +210,7 @@ const Dashboard = () => {
                       w="12px"
                       h="12px"
                       borderRadius="full"
-                      bg={chat.status === "online" ? "green.400" : "gray.400"}
+                      bg={user.status === "online" ? "green.400" : "gray.400"}
                     />
                   </Avatar>
                   <Box>
@@ -190,13 +218,13 @@ const Dashboard = () => {
                       fontWeight="bold"
                       color={isDarkMode ? "white" : "black"}
                     >
-                      {chat.name}
+                      {user.name}
                     </Text>
                     <Text
                       fontSize="sm"
                       color={isDarkMode ? "gray.400" : "gray.500"}
                     >
-                      {chat.lastMessage}
+                      {user.lastMessage}
                     </Text>
                   </Box>
                 </HStack>
@@ -208,7 +236,7 @@ const Dashboard = () => {
 
       {/* Right Main Chat Area */}
       <Box w="70%" bg={isDarkMode ? "gray.800" : "white"}>
-        {!selectedChat ? (
+        {!selectedUser ? (
           <Flex
             align="center"
             justify="center"
@@ -249,14 +277,14 @@ const Dashboard = () => {
               zIndex="1"
             >
               <HStack spacing={3}>
-                <Avatar name={selectedChat.name} bg="blue.600" size="md" />
+                <Avatar name={selectedUser.name} bg="blue.600" size="md" />
                 <Box>
                   <Text
                     fontSize="md"
                     fontWeight="bold"
                     color={isDarkMode ? "white" : "blue.700"}
                   >
-                    {selectedChat.name}
+                    {selectedUser.name}
                   </Text>
                 </Box>
               </HStack>
